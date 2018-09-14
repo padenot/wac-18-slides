@@ -3,13 +3,42 @@
 <head>
 <link rel=stylesheet href="zilla-slab.css">
 <title>
-  Recent and future evolution of the Web Audio API
+  Recent and future evolution of the Web Audio API (again)
 </title>
 <meta charset="utf-8">
 <style>
 body {
   font-family: "Zilla Slab";
 }
+
+
+blink {
+    -webkit-animation: 1s linear infinite condemned_blink_effect; // for android
+    animation: 1s linear infinite condemned_blink_effect;
+}
+@-webkit-keyframes condemned_blink_effect { // for android
+    0% {
+            visibility: hidden;
+        }
+    50% {
+            visibility: hidden;
+        }
+    100% {
+            visibility: visible;
+        }
+}
+@keyframes condemned_blink_effect {
+    0% {
+            visibility: hidden;
+        }
+    50% {
+            visibility: hidden;
+        }
+    100% {
+            visibility: visible;
+        }
+}
+
 h1, .logo {
   font-family: "Zilla Slab Highlight";
   font-weight: 700;
@@ -68,456 +97,272 @@ dd {
 
   <span class="big logo">mozilla</span>
 
-  Web Audio Conference 2017
+  Web Audio Conference 2018
 
-  Queen Mary University, London
+  TU Berlin
+
+  ---
+
+  class: middle
+
+  ```sh
+  $ git clone git@github.com:padenot/wac-17-slides.git wac-18-slides
+  $ cd wac-18-slides
+  $ sed -i "s/17/18/" index.html
+  $ sed -i "s/London/Berlin/" index.html
+  ```
 
   ---
 
   # Agenda
 
-  ## What's new since WAC'16?
+  ## What's new in the spec since WAC'17?
   ## Where are we in the standardization process?
-  ## What's coming up?
+  ## What's coming up (more exciting this time around)?
+
+  ---
+
+  class: middle center
+
+  # Some statistics: pull requests
+
+  <img src="merged.png" style="max-width:80%">
+
+  ---
+
+  class: middle center
+
+  # Some statistics: issues
+
+  <img src="closed.png" style="max-width:80%">
 
   ---
 
   class: middle
 
-  # HOWTO
+  # Contributor count
 
   ```sh
-  $ cd ~/src/repositories/web-audio-api/
-  $ git checkout gh-pages
-  $ git pull
-  $ git diff --stat @{2016-04-04}..@{2017-08-23}
-  ```
-
-  ---
-
-  class: center, middle
-
-  <iframe src="changes.html"></iframe>
-
-  ---
-  
-  class: middle
-
-  # in details
-
-  ```sh
-  $ git log --stat --since=2016-04-04
-  ```
-
-  ---
-
-  class: middle
-  
-  <iframe src="log.html"></iframe>
-
-  ---
-
-  class: middle
-
-  # commit count
-
-  ```sh
-  $ git log --since=2016-04-04  | grep "Date:" | wc -l
-  754
-  ```
-
-  ---
-
-  class: middle
-
-  # contributor count
-
-  ```sh
-  $ git log --color --since=2016-04-04 
+  $ git log --color --since=2017-08-23
   | grep "Author:" | sort | uniq | wc -l
-  21
+  19
   ```
 
-  - BBC, Google, Intel, Opera, Microsoft, Mozilla, Noteflight, W3C, etc.
+  - BBC, Google, Intel, Dolby, Opera, Microsoft, Mozilla, Noteflight, W3C, etc.
   - Universities, public research lab
   - Independant people
 
-  Tons more discussing on issues !
+  ---
+
+  class: center middle
+
+  # Changes to the spec
 
   ---
 
-  # commit time repartition
+  class: center middle
 
+  # Changes to the <blink style="color:red">spec</blink>
 
-  ```sh
-  $ git log --format="%at" --since=2016-04-04 
-            | python datehist.py `git rev-parse --show-toplevel`
+  ---
+
+  # However
+
+  Tests are happening, lots of tests from Chromium, some from Mozilla, and then
+  some other.
+
+  - <a href="https://wpt.fyi/results/webaudio">https://wpt.fyi/results/webaudio</a>
+  - <a href="https://treeherder.mozilla.org/#/jobs?repo=mozilla-central">https://treeherder.mozilla.org/#/jobs?repo=mozilla-central</a>
+  - Also running on Chromium's CI
+
+  Reasonably encouraging Web Compat results
+
+  ---
+
+  # AudioWorklet - related changes
+
+  ---
+
+  # OfflineAudioContext lazy allocation
+
+  - The allocation is only done when `startRendering()` is called
+  - A failure to allocate is signaled by a rejected `Promise`
+
+  ---
+
+  # MediaElementAudio SourceNode behaviour
+
+  - Once "captured", can't undo it
+  - On `AudioContext.{close, suspend}`, audio frames are dropped (not auto
+  paused/no auto routed to the speakers again)
+  - `HTMLMediaElement.captureStream()` exists, is more flexible
+
+  ---
+
+  # PannerNode .set{Orientation,Position} and ctor can now throw
+
+  - (Reminder) Equivalent to:
+
+  ```
+  {PannerNode,AudioListener}.{position,orientation}.{X,Y,Z}.value = v;
   ```
 
-  <img src="repartition.svg" style="max-width: 80%">
+  - Throws is if a `setValueCurveAtTime` event exists at `currentTime`
+  - The ctor checks for values outside valid values, and can now throw
+  - `refDistance` can now be 0
 
   ---
 
-  # Breakdown
+  # AnalyserNode memory footprint
 
-  ## New features
-
-  ## Breaking changes
-
-  ## Retro-specification :-(
+  - Changing `fftSize` should not introduce discontinuities
+  - This means that the node should always keep 32768 sample-frames
+  around for each `AnalyserNode`.
 
   ---
 
-  # destination has an output
+  # Cycles with AudioParam, AudioListener
+
+  - `AudioParam` have a transitive precedence relation with their `AudioNode`
+  - `AudioListener` is an implicit input of all the `PannerNode`s
+  - This allows the quasi-topological sort to yield the correct order, and to
+  have minimal delay in cycles
+
+  ---
+
+  # Editorial
+
+  - Now use [bikeshed](https://github.com/tabatkins/bikeshed) instead of [ReSpec](https://github.com/w3c/respec)
+      - Faster spec loading
+      - More cross-referencing capabilities
+      - Algorithms validation
+      - Generaly more ergonomic
+  - Auto-publishing and tests via [travis-ci](https://travis-ci.org/WebAudio/web-audio-api)
+  - [Diff](https://pr-preview.s3.amazonaws.com/WebAudio/web-audio-api/1737/c05ff33...rtoy:10a9cfb.html#Convolution-channel-configurations) and [preview](https://pr-preview.s3.amazonaws.com/rtoy/web-audio-api/pull/1737.html) in PRs
+  - [Changelog](https://webaudio.github.io/web-audio-api/#changelog) (required for CR)
+  - IP validation for any non-trivial PR
+
+  ---
+
+  # AudioContextOptions
+
+  - Can specify settings like so:
 
   ```js
-  var ac = new AudioContext();
 
-  [...]
-
-  // Get a MediaStreamDestinationNode
-  var msdn = ac.createMediaStreamDestination();
-
-  // NEW! connect the context destination to something!
-  ac.destination.connect(msdn);
-
-  // Feed it to a recorder, an RTCPeerConnection...
-  var rec = new MediaRecorder(msdn.stream);
-  ```
-
-  ---
-
-  # Biquad Filter formula change
-
-  <dl>
-    <dt>Rationale</dt>
-    <dd><a
-      href="https://github.com/WebAudio/web-audio-api/issues/771">https://github.com/WebAudio/web-audio-api/issues/771</a></dd>
-    <dt>Detection of old vs. new filters</dt>
-    <dd><a
-      href="https://github.com/GoogleChrome/web-audio-samples/wiki/Detection-of-lowpass-BiquadFilter-implementation">https://github.com/GoogleChrome/web-audio-samples/wiki/Detection-of-lowpass-BiquadFilter-implementation</a></dd>
-    <dt>Test page</dt>
-    <dd><a
-      href="http://rtoy.github.io/webaudio-hacks/more/biquad/biquad-lowpass-q.html?usedB=true">http://rtoy.github.io/webaudio-hacks/more/biquad/biquad-lowpass-q.html?usedB=true</a></dd>
-  </dl>
-
-  ---
-
-  # AudioParam
-
-  - Nominal ranges
-
-  - `value` behaviour changed
-
-  - Introspection: `minValue`, `maxValue`, `defaultValue`
-
-  ---
-
-  # Doppler effect is gone
-
-    - Specification was fundamentaly broken
-
-    - Behaviour was weird
-
-    - Usage was minimal
-
-    - `setVelocity` on `AudioListener` and `PannerNode`
-
-  ---
-
-  # Latency and clock correlation
-
-  <dl class=bigger>
-    <dt><code>AudioContext.baseLatency</code></dt>
-    <dd>latency of the graph processing/buffering caused by sandboxing/etc.</dd>
-    <dt><code>AudioContext.outputLatency</code></dt>
-    <dd>usual audio output latency (audio callback <code>-></code> ear)</dd>
-    <dt><code>AudioContext.getOutputTimestamp()</code></dt>
-    <dd>Correlation between <code>Date.now()</code> (system clock) &amp;
-    <code>AudioContext.currentTime</code> (audio subsystem clock)</dd>
-  </dl>
-
-  ---
-
-  # Latency hint
-
-  ```js
-  new AudioContext({ latencyHint: "interactive" });
-  new AudioContext({ latencyHint: "playback" });
-  new AudioContext({ latencyHint: "balanced" });
-  new AudioContext({ latencyHint: 0.05 /* seconds */ });
-  ```
-
-  <span class=big>Trade CPU/battery usage vs. audio latency</span>
-
-  Authors can determine the actual latency:
-
-  ```js
-  var ac = new AudioContext({latencyHint: "playback"});
-  console.log("Base latency:" + ac.baseLatency);
-  console.log("Audio output  latency:" + ac.outputLatency);
-  console.log("Total latency:" + (ac.baseLatency + ac.outputLatency));
-  ```
-
-
-  ---
-
-  # PannerNode AudioParam
-
-  <dl>
-    <dt>A bunch of new <code>AudioParam</code>s on the panner:</dt>
-    <dd><code>PannerNodeposition.{position{X,Y,Z}, orientation{X,Y,Z}}</code></dd>
-    <dt>... and on the <code>AudioListener</code></dt>
-    <dd><code>AudioListener.{position{X,Y,Z},forward{X,Y,Z},up{X,Y,Z}}</code></dd>
-  </dl>
-
-  <p class=bigger>
-  <em>a-rate</em> parameters on <code>"equal-power"</code>
-  <code>PannerNode</code>, <em>k-rate</em> on <code>"HRTF"</code> nodes.
-  </p>
-
-  ```js
-    panner.setPosition(1,2,3);
-
-    panner.positionX.value = 1;
-    panner.positionY.value = 2;
-    panner.positionZ.value = 3;
-  ```
-
-
-  ---
-
-  # setValueCurveAtTime implicit setValueAtTime
-
-  ```js
-  ap.setValueCurveAtTime(array, startTime, duration);
-  ```
-
-  now does the equivalent of:
-
-  ```js
-  ap.setValueCurveAtTime(array, startTime, duration);
-  ap.setValueAtTime(array[array.length - 1], startTime + duration);
-  ```
-
-  ---
-
-  # currentTime progression
-
-  Incremented by a <em>render quantum</em> (128 sample-frames), atomically,
-  without waiting for stable state, at the <em>end</em> of the <em>render
-  quantum</em>.
-
-  ---
-
-  # Real constructors
-
-  ```js
-    var ac = new AudioContext();
-
-    var gain1 = ac.createGain();
-    var gain2 = new GainNode(ac);
-
-    var buf1 = ac.createBufferSource(2, 128, 44100);
-    var buf2 = new AudioBuffer({ length: 128,
-                                 channels: 2,
-                                 sampleRate: 44100 });
-    // Mono by default
-    var buf2 = new AudioBuffer({ length: 128,
-                                 sampleRate: 44100});
-
-    var pw = ac.createPeriodicWave([1,2,3], [3,2,1]);
-    var pw2 = new PeriodicWave([1,2,3], [3,2,1]);
-  ```
-
-  paves the way for subclassing `AudioNode`s.
-
-  ---
-
-  # AudioNode dictionnary initialisation
-
-  Allow to share initialization objects, available for all `AudioNode`s:
-
-  ```js
-  var ac = new AudioContext;
-  var gain = new GainNode(ac, { gain: 3.0 });
-  var delay = new DelayNode(ac, { delayTime: 0.3 });
-  var source = 
-    new AudioBufferSourceNode(ac, { buffer: new AudioBuffer(...),
-                                    playbackRate: 3.0
-                                    detune: 700,
-                                    loop: true });
-  var osc = new OscillatorNode(ac, { type: "square", detune: 700 });
-  ```
-
-  ---
-
-  # ConstantSourceNode
-
-  The equivalent of:
-
-  ```js
-  var ac = new AudioContext();
-  var source = new AudioBufferSourceNode();
-  var gain = new GainNode();
-  var buffer =
-    new AudioBuffer({length: 1, sampleRate: ac.sampleRate});
-  buffer.getChannelData(0)[0] = 1.0;
-  source.connect(gain);
-  source.buffer = buffer;
-  ```
-
-  and modifying `gain.gain`.
-
-  ```js
-  var ac = new AudioContext();
-  var c = new ConstantSourceNode();
-  c.offset.value = 1000;
-  c.start(ac.currentTime + 3.5);
-  c.stop();
-  ```
-
-  ---
-
-  class: center, middle
-
-  # AudioWorklet
-
-  ---
-
-  # cancelAndHoldAtTime
-
-  New `AudioParam` method, that does what it says:
-
-  ```js
-    var ac = new AudioContext;
-    var gain = new GainNode(ac);
-    gain.gain.setValueAtTime(1.0, ac.currentTime);
-    gain.gain.setTargetAtTime(0.0, ac.currentTime, 0.1);
-    gain.gain.cancelAndHoldAtTime(ac.currentTime + 0.1);
-    // gain.gain.value is some value in between 0.0 and 1.0.
-  ```
-
-  ---
-
-  class: center, middle
-
-  # MediaStreamAudioSourceNode and MediaElementAudioSourceNode lifetime
-
-  ---
-
-  # Allow delaying audio playback
-
-  In practice, the initial `"suspended" => "running"` transition is allowed to
-  be delayed, this allow knowing there is no audio that is currently being
-  output.
-
-  More-or-less standardization of Safari's behaviour on mobile, but with more
-  discoverability.
-
-  ---
-
-  <small>
-    <h1>MediaStreamTrackAudioSourceNode</h1>
-  </small>
-
-  New `AudioNode`, allowing to precisely decide which `MediaStreamTrack` of a
-  `MediaStream` is going to be routed to an `AudioContext`:
-
-  ```js
-  // ms is some MediaStream
-  var ac = new AudioContext();
-  // route the second audio track of a given MediaStream
-  var mstan =
-    new MediaStreamTrackAudioSourceNode(ac, ms.getAudioTracks()[1]);
-  ```
-
-  ---
-
-  # Configurable sample-rate for AudioContext
-
-  ```js
-  var ac = new AudioContext({sampleRate: 8000});
+  var ac = new AudioContext({ latencyHint: "playback",
+                              sampleRate: 16000 });
 
   ```
 
-  Allows lower CPU usage, useful for emulation, lo-fi audio work, and for very
-  specific jobs (like `AudioBufferSourceNode` stiching).
+  - By default
+      - `"interactive"` (low-latency) audio output
+      - sample-rate rate of the default audio output device sample-rate
+      - beware of 192kHz sound card, 💸💸💸.
 
   ---
 
-  # Specify AudioBufferSourceNode &amp; DynamicsCompressorNode
+  # AudioBufferSourceNode precise definition
 
-  <dl>
-    <dt><code>AudioBufferSourceNode</code> playback algorithm</dt>
-    <dd><ul>
-      <li><a
-      href=https://webaudio.github.io/web-audio-api/#playback-AudioBufferSourceNode>processing
-      algorithm</a> </li>
-    <li>Subsample-accurate start and looping</li>
-    </li>
-    </dd>
-    <dt><code>DynamicsCompressorNode</code> processing algorithm</dt>
-    <dd>
-    <ul>
-      <li>
-      <a href="https://webaudio.github.io/web-audio-api/#processing">processing algorithm</a>
-      </li>
-      <li> Hard or soft-knee, peak detecting, adaptive release, fixed-lookahead,
-      automatic makeup-gain </li>
-      </li>
-    </ul>
-    </dd>
-  </dl>
+  Very precisely specced now
+
+  - [Looping](https://webaudio.github.io/web-audio-api/#looping-AudioBufferSourceNode)
+  - [Playback](https://webaudio.github.io/web-audio-api/#playback-AudioBufferSourceNode)
+
+  Start and stop are subsample-accurate, looping as well. Specced with an
+  algorithm (more precise than english), with lots of (non-normative) diagrams
+  to explain.
 
   ---
 
-  # sequence**<**float**>** instead of Float32Array
+  # AudioParam rates
 
-  ```js
-  var ac = new AudioContext();
-  var real = new Float32Array(2);
-  real[0] = 0.0;
-  real[1] = 0.0;
-  var imag = new Float32Array(2);
-  imag[0] = 0.0;
-  imag[1] = 1.0;
-  var wave = ac.createPeriodicWave(real, imag):
-  ```
-
-  vs.
-
-  ```js
-  var ac = new AudioContext();
-  var wave = new PeriodicWave({ real: [0,0], imag: [0,1] });
-
-  ```
+  - `AudioParam.automationRate` : `a-rate` | `k-rate`
+  - A few restrictions
+      - `AudioBufferSourceNode.{playbackRate,detune}`, always `"k-rate"`
+      - `DynamicsCompressorNode.{threshold, knee, ratio, attack, release}`, always `"k-rate"`
+      - `PannerNode`, `AudioListener` `AudioParam`s, always `"k-rate"` if HRTF,
+      selectable otherwise.
+      - `BiquadFilterNode` params are now `a-rate` (allows audio rate modulation
+      of filter cutoff, etc.)
+      - `k-rate` often _much_ cheaper in terms of CPU
 
   ---
 
-  # Convenience introspection attribute
+  # AudioBuffer clarifications
 
-  `MediaStreamAudioSourceNode.mediaStream` and
-  `MediaElementAudioSourceNode.mediaElement`, instead of having to set it as an
-  expando or kept around elsewhere.
-
-  ---
-
-  class: middle, center
-
-  # MediaElementAudioSourceNode channel ordering
+  - `new AudioBuffer` can throw: OOM (by policy or because of hardware
+     constraints)
+  - `copyFromChannel` and `copyToChannel` can throw as well
 
   ---
 
-  # Route to candidate recommendation
+  # OscillatorNode detune nominal range
 
-  - Raymond Toy (Google) is <em>officially</em> editor since April last year
-  - Few big blockers left (last big one was `DynamicsCompressorNode`)
-  - W3C Audio Working Group Re-chartered
-  - CR transition documents
-  - `web-platform-test`s are lacking a bit (good test suites in implementations,
-    interoperable)
-  - Spec issues on Github are tagged `v.next`
+  Reminder: silent clipping of `AudioParam`s to nominal range _during
+  processing_.
+
+  Now ±1200 ⋅ log<sub>2</sub>`FLT_MAX` (around ±153600), prevents overflows and
+  NaNs, etc.
+
+  ---
+
+  # Closed BaseAudioContext
+
+  Does not throw error anymore. In fact nothing throws when a context is
+  closed, things just don't happen.
+
+  ---
+
+  # AudioParam insertion rules
+
+  In a few words:
+
+  - It's allowed to schedule a ramp that ends on a curve.
+  - It's allowed to schedule something exactly at the end of the curve
+  - It's not allowed to schedule something that starts or end in a curve
+  - We're trying to make it so that time are _not_ clamped w.r.t `currentTime`
+
+  ---
+
+  # Suspend/resume early return
+
+  - Now the promise is going to do the full round-trip every time
+  - Makes reasonning simpler
+
+  ---
+
+  # AudioWorklet changes
+
+  - Numerous
+  - Output arrays are zero-initialized
+  - `outputChannel` now works in the ctor (mono by default)
+  - `AudioParam` `ArrayBuffer` with constant value during this render quantum
+     can have a length of 1
+  - Return value
+  - `processorOptions` dictionary
+  - `currentFrame` in Worklet Global Scope
+  - Event loop clarifications
+
+  ---
+
+  # The big GC observability issue
+
+  XXX 
+
+  ---
+
+  # Security and privacy consideration section
+
+  Required for CR
+
+  Analysis of various fingerprinting vectors:
+
+  - Hardware characteristics: max channel count, sample-rate (can be spoofed)
+  - Clock skew between system time and audio time
+  - Latency figures, depends on the hardware and software
+  - Ultrasonic communication channel
+  - System sound masquerading
 
   ---
 
@@ -552,9 +397,9 @@ dd {
     </dt>
     <dd>
       <a
-        href="https://padenot.github.io/wac-17-slides">https://padenot.github.io/wac-17-slides</a><br>
+        href="https://padenot.github.io/wac-18-slides">https://padenot.github.io/wac-18-slides</a><br>
       <a
-        href="https://github.com/padenot/wac-17-slides">https://github.com/padenot/wac-17-slides</a>
+        href="https://github.com/padenot/wac-18-slides">https://github.com/padenot/wac-18-slides</a>
     </dd>
     <dt>
       Editor's draft of the specification
@@ -589,4 +434,9 @@ dd {
 var slideshow = remark.create();
 </script>
 </body>
+<style>
+.remark-slide-content {
+    font-size: 28px;
+}
+</style>
 </html>
