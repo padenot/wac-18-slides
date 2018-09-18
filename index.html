@@ -179,7 +179,43 @@ dd {
 
   ---
 
-  # AudioWorklet - related changes
+  # Editorial
+
+  - Now use [bikeshed](https://github.com/tabatkins/bikeshed) instead of [ReSpec](https://github.com/w3c/respec)
+      - Faster spec loading
+      - More cross-referencing capabilities
+      - Algorithms validation
+      - Generaly more ergonomic
+  - Auto-publishing and tests via [travis-ci](https://travis-ci.org/WebAudio/web-audio-api)
+  - [Diff](https://pr-preview.s3.amazonaws.com/WebAudio/web-audio-api/1737/c05ff33...rtoy:10a9cfb.html#Convolution-channel-configurations) and [preview](https://pr-preview.s3.amazonaws.com/rtoy/web-audio-api/pull/1737.html) in PRs
+  - [Changelog](https://webaudio.github.io/web-audio-api/#changelog) (required for CR)
+  - [IP validation](https://labs.w3.org/hatchery/repo-manager/pr/id/WebAudio/web-audio-api/1758) for any non-trivial PR (automatic)
+
+  ---
+
+  # Fixes taxonomy
+
+  In order of frequency:
+
+  - CR process compliance
+  - Features
+  - Bug fixes
+  - Specification holes
+
+  ---
+
+  # AudioWorklet changes
+
+  - Numerous
+  - Output arrays are zero-initialized
+  - `outputChannel` now works in the ctor (mono by default)
+  - Flexible channel topologies (`n` inputs of `m` channels).
+  - `AudioParam` `ArrayBuffer` with constant value during this render quantum
+     _can_ have a length of 1
+  - Return value (allows implementing tails)
+  - `processorOptions` dictionary
+  - `currentFrame` in Worklet Global Scope
+  - Normative text for event loop integration
 
   ---
 
@@ -227,20 +263,6 @@ dd {
   - `AudioListener` is an implicit input of all the `PannerNode`s
   - This allows the quasi-topological sort to yield the correct order, and to
   have minimal delay in cycles
-
-  ---
-
-  # Editorial
-
-  - Now use [bikeshed](https://github.com/tabatkins/bikeshed) instead of [ReSpec](https://github.com/w3c/respec)
-      - Faster spec loading
-      - More cross-referencing capabilities
-      - Algorithms validation
-      - Generaly more ergonomic
-  - Auto-publishing and tests via [travis-ci](https://travis-ci.org/WebAudio/web-audio-api)
-  - [Diff](https://pr-preview.s3.amazonaws.com/WebAudio/web-audio-api/1737/c05ff33...rtoy:10a9cfb.html#Convolution-channel-configurations) and [preview](https://pr-preview.s3.amazonaws.com/rtoy/web-audio-api/pull/1737.html) in PRs
-  - [Changelog](https://webaudio.github.io/web-audio-api/#changelog) (required for CR)
-  - IP validation for any non-trivial PR
 
   ---
 
@@ -314,6 +336,13 @@ dd {
 
   ---
 
+  # Suspend/resume early return
+
+  - Now the promise is going to do the full round-trip every time
+  - Makes reasonning about it much simpler
+
+  ---
+
   # AudioParam insertion rules
 
   In a few words:
@@ -325,30 +354,19 @@ dd {
 
   ---
 
-  # Suspend/resume early return
-
-  - Now the promise is going to do the full round-trip every time
-  - Makes reasonning simpler
-
-  ---
-
-  # AudioWorklet changes
-
-  - Numerous
-  - Output arrays are zero-initialized
-  - `outputChannel` now works in the ctor (mono by default)
-  - `AudioParam` `ArrayBuffer` with constant value during this render quantum
-     can have a length of 1
-  - Return value
-  - `processorOptions` dictionary
-  - `currentFrame` in Worklet Global Scope
-  - Event loop clarifications
-
-  ---
-
   # The big GC observability issue
 
-  XXX 
+  - Consequence of `AudioWorklet`
+  - GC observability via the number of channels
+
+  ---
+
+  # Tail time vs. channels
+
+  - Channel changes now occur after the tail time
+  - The goal is for channel changes to not be observable, but to allow
+  optimizations
+  - Take into account `channelIntepretation`, `channelCountMode`.
 
   ---
 
