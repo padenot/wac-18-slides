@@ -189,7 +189,7 @@ dd {
   - Auto-publishing and tests via [travis-ci](https://travis-ci.org/WebAudio/web-audio-api)
   - [Diff](https://pr-preview.s3.amazonaws.com/WebAudio/web-audio-api/1737/c05ff33...rtoy:10a9cfb.html#Convolution-channel-configurations) and [preview](https://pr-preview.s3.amazonaws.com/rtoy/web-audio-api/pull/1737.html) in PRs
   - [Changelog](https://webaudio.github.io/web-audio-api/#changelog) (required for CR)
-  - [IP validation](https://labs.w3.org/hatchery/repo-manager/pr/id/WebAudio/web-audio-api/1758) for any non-trivial PR (automatic)
+  - [IPR validation](https://labs.w3.org/hatchery/repo-manager/pr/id/WebAudio/web-audio-api/1758) for any non-trivial PR (automatic)
 
   ---
 
@@ -206,7 +206,7 @@ dd {
 
   # AudioWorklet changes
 
-  - Numerous
+  - ... numerous
   - Output arrays are zero-initialized
   - `outputChannel` now works in the ctor (mono by default)
   - Flexible channel topologies (`n` inputs of `m` channels).
@@ -249,20 +249,21 @@ dd {
 
   ---
 
-  # AnalyserNode memory footprint
-
-  - Changing `fftSize` should not introduce discontinuities
-  - This means that the node should always keep 32768 sample-frames
-  around for each `AnalyserNode`.
-
-  ---
-
   # Cycles with AudioParam, AudioListener
 
   - `AudioParam` have a transitive precedence relation with their `AudioNode`
   - `AudioListener` is an implicit input of all the `PannerNode`s
   - This allows the quasi-topological sort to yield the correct order, and to
   have minimal delay in cycles
+
+  ---
+
+  # AnalyserNode memory footprint
+
+  - Changing `fftSize` should not introduce discontinuities
+  - This means that the node should always keep 32768 sample-frames
+  around for each `AnalyserNode`.
+
 
   ---
 
@@ -324,8 +325,11 @@ dd {
   Reminder: silent clipping of `AudioParam`s to nominal range _during
   processing_.
 
-  Now ±1200 ⋅ log<sub>2</sub>`FLT_MAX` (around ±153600), prevents overflows and
-  NaNs, etc.
+  Now:
+
+  ±1200 × log<sub>2</sub>(FLT_MAX) ≅ ±153600
+
+  This prevents overflows and NaNs, etc.
 
   ---
 
@@ -354,15 +358,19 @@ dd {
 
   ---
 
-  # The big GC observability issue
+  # The big garbage collection observability issue
 
-  - Consequence of `AudioWorklet`
-  - GC observability via the number of channels
+  - Consequence of the fact that an `AudioWorklet` is "_in_" the graph itself
+  - Garbage collection observability via the number of channels, possibly transitively through
+  multiple nodes
+  - Fixed via making the channel count tied to deterministic events in the
+  lifetime of the `AudioNode`s
 
   ---
 
   # Tail time vs. channels
 
+  - Specify the intuitive behaviour
   - Channel changes now occur after the tail time
   - The goal is for channel changes to not be observable, but to allow
   optimizations
@@ -381,6 +389,19 @@ dd {
   - Latency figures, depends on the hardware and software
   - Ultrasonic communication channel
   - System sound masquerading
+
+  ---
+
+  # Web Audio API is now a W3C Candidate Recommendation
+
+  - 🍾🍻
+  - The text specifies a coherent set of features, with multiple interoperable
+  implementations
+  - Loooong process
+  - Has been reviewed by various groups and with different perspectives (TAG,
+  Security & privacy review)
+  - A few issues in the CR text, please still refer to the Editor's Draft
+  - New charter, largely similar
 
   ---
 
@@ -407,6 +428,8 @@ dd {
 
   ---
 
+  class: small
+
   # Thanks !
 
   <dl>
@@ -416,8 +439,6 @@ dd {
     <dd>
       <a
         href="https://padenot.github.io/wac-18-slides">https://padenot.github.io/wac-18-slides</a><br>
-      <a
-        href="https://github.com/padenot/wac-18-slides">https://github.com/padenot/wac-18-slides</a>
     </dd>
     <dt>
       Editor's draft of the specification
@@ -455,6 +476,9 @@ var slideshow = remark.create();
 <style>
 .remark-slide-content {
     font-size: 28px;
+}
+.small {
+    font-size: 24px;
 }
 </style>
 </html>
