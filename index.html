@@ -118,7 +118,7 @@ dd {
 
   ## What's new in the spec since WAC'17?
   ## Where are we in the standardization process?
-  ## What's coming up (more exciting this time around)?
+  ## What's next?
 
   ---
 
@@ -407,18 +407,50 @@ dd {
 
   # V.NEXT
 
-  - Audio encoding/decoding consolidation
-  - In memory compressed audio asssets
-  - `SharedArrayBuffer` + `AudioWorklet` + `wasm` = ❤️
+  - Gates are officially opened for new ideas and features
+  - We (the AudioWG) have labeled existing issues, and assigned initial
+  priorities
+      - [High priority V2](https://github.com/WebAudio/web-audio-api/issues?q=is%3Aopen+is%3Aissue+label%3A%22High+Priority+V2%22)
+      - [Dynamics
+      processing](https://github.com/WebAudio/web-audio-api/issues?utf8=%E2%9C%93&q=is%3Aopen+is%3Aissue+label%3A%22Theme+-+Dynamics+Processing%22+)
+      - [Encoding/Decoding](https://github.com/WebAudio/web-audio-api/labels/Theme%20-%20Encoding%2FDecoding)
+      - [FFT/IFFT](https://github.com/WebAudio/web-audio-api/labels/Theme%20-%20FFT%2FIFFT)
+      - [Input/Output devices](https://github.com/WebAudio/web-audio-api/labels/Theme%20-%20Input%2FOutput)
+      - [API design/Layering](https://github.com/WebAudio/web-audio-api/labels/Theme%20-%20Layering)
+      - [Spatial audio](https://github.com/WebAudio/web-audio-api/labels/Theme%20-%20Spatial%20Audio)
+      - [Timing/scheduling](https://github.com/WebAudio/web-audio-api/labels/Theme%20-%20Timing%2FScheduling)
+      - [V1 enhancements](https://github.com/WebAudio/web-audio-api/labels/Theme%20-%20V1%20Enhancement)
+
+  ---
+
+  # My (personal) view on the matter
+
+  - Audio output device decoupling
+  - Symmetrical synchronous and asynchronous audio/video encoding/decoding API,
+    based on [WhatWG Streams](https://streams.spec.whatwg.org/)
+  - Tight WASM integration (B.Y.O.B. API)
+  - CPU flags management (`DAZ`/`FTZ`) for WASM
   - `AudioContext` in Web Worker
-  - Configurable `AudioParam` rate
-  - Custom HRTF
-  - Pulse/noise oscillator
-  - Expose x-runs
-  - Oscillator phase offset as an audioparam
-  - Frequency domain nodes 
-  - Side chain compression
-  - Expander/noise-gain
+  - In memory audio buffer compression
+
+  ---
+
+  # Help wanted
+
+  - (Please please please) think very hard about what you need
+  - (Please please please) write prototypes
+  - (Please please please) don't open issues on things that are already possible
+  - (Please please please) don't open issues on implementations (use the
+  vendor's tracker)
+
+  ---
+
+  # How to help us
+
+  - Have you or your company join the group
+  - Discuss on GitHub
+  - Write Web Platform Tests
+  - Contribute patches to implementations
 
   ---
 
